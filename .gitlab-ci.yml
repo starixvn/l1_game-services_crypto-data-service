@@ -1,0 +1,4 @@
+include:
+  - project: "ci/repos-ci/pentagon_l1_crypto_data_service"
+    ref: master
+    file: "gitlab-ci.yml"
