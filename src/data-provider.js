@@ -1,5 +1,6 @@
 import CandleStick from "./candle-stick";
 import { BinanceExchange, HuobiExchange, MexcExchange } from "./exchange";
+import CryptoExchanges from "./models/crypto-exchange";
 import {
   BinanceRounds,
   HuobiRounds,
@@ -26,12 +27,21 @@ export default class DataProvider {
       MexcRounds
     );
 
-    this.klines = [];
+    this.cryptoExchangeRepository = CryptoExchanges;
+
+    this.averageCandleSticks = [];
   }
 
   async init() {
-    //await this.initKlineData();
+    await this.initKlineData();
     this.initWebSocket();
+    this.initCron();
+  }
+
+  initCron() {
+    this.intervalId = setInterval(async () => {
+      await this.updateExchangeData();
+    }, 1000);
   }
 
   initWebSocket() {
@@ -41,37 +51,11 @@ export default class DataProvider {
   }
 
   async initKlineData() {
-    const [binanceKlines, huobiKlines, mexcKlines] = await Promise.all([
+    await Promise.all([
       this.binanceExchange.getKlines(),
       this.huobiExchange.getKlines(),
       this.mexcExchange.getKlines(),
     ]);
-
-    const klines = [];
-    for (let i = 0; i < 30; i++) {
-      const binanceKline = binanceKlines[i];
-      const huobiKline = huobiKlines[i];
-      const mexcKline = mexcKlines[i];
-      if (
-        binanceKline.time.getTime() !== huobiKline.time.getTime() ||
-        binanceKline.time.getTime() !== mexcKline.time.getTime()
-      ) {
-        console.log(binanceKline);
-        console.log(huobiKline);
-        console.log(mexcKline);
-        return;
-      } else {
-        klines.push(
-          this.calculateAverageCandleStick([
-            binanceKline,
-            huobiKline,
-            mexcKline,
-          ])
-        );
-      }
-    }
-
-    this.klines = klines;
   }
 
   calculateAverageCandleStick(candleSticks) {
@@ -93,29 +77,65 @@ export default class DataProvider {
     );
   }
 
-  calculateLatestCandleStick() {
-    const candleSticks = [
-      this.binanceExchange.latestCandleStick,
-      this.huobiExchange.latestCandleStick,
-      this.mexcExchange.latestCandleStick,
+  updateAverageCandleSticks() {
+    for (let i = 0; i < 30; i++) {
+      const binance = this.binanceExchange.candleSticks[i];
+      const huobi = this.huobiExchange.candleSticks[i];
+      const mexc = this.mexcExchange.candleSticks[i];
+
+      this.averageCandleSticks.push(
+        this.calculateAverageCandleStick([binance, huobi, mexc])
+      );
+    }
+  }
+
+  async updateExchangeData() {
+    const runningCandleSticks = [
+      this.binanceExchange.runningCandleStick,
+      this.huobiExchange.runningCandleStick,
+      this.mexcExchange.runningCandleStick,
     ];
 
     if (
-      candleSticks.every(
-        (x) => x && x.time.getTime() === candleSticks[0].time.getTime()
+      runningCandleSticks.every(
+        (x) => x && x.time.getTime() === runningCandleSticks[0].time.getTime()
       )
     ) {
-      const latestCandleStick = this.calculateAverageCandleStick(candleSticks);
+      if (this.averageCandleSticks.length === 0) {
+        this.updateAverageCandleSticks();
+      }
+
+      const runningCandleStick =
+        this.calculateAverageCandleStick(runningCandleSticks);
 
       if (
-        this.klines[this.klines.length - 1].time.getTime() <
-        latestCandleStick.time.getTime()
+        this.averageCandleSticks[
+          this.averageCandleSticks.length - 1
+        ].time.getTime() < runningCandleStick.time.getTime()
       ) {
-        this.klines.shift();
-        this.klines.push(latestCandleStick);
+        this.averageCandleSticks.shift();
+        this.averageCandleSticks.push(runningCandleStick);
       } else {
-        this.klines[this.klines.length - 1] = latestCandleStick;
+        this.averageCandleSticks[this.averageCandleSticks.length - 1] =
+          runningCandleStick;
       }
+
+      const updateObj = {
+        runningCandleStick,
+        averageCandleSticks: this.averageCandleSticks,
+        binance: this.binanceExchange.candleSticks,
+        huobi: this.huobiExchange.candleSticks,
+        mexc: this.mexcExchange.candleSticks,
+        updatedTime: new Date(),
+      };
+
+      await this.cryptoExchangeRepository.updateOne(
+        {},
+        {
+          $set: updateObj,
+        },
+        { upsert: true, setDefaultsOnInsert: true }
+      );
     }
   }
 }

@@ -5,7 +5,8 @@ import axios from "axios";
 import { logger } from "sc-common";
 
 export default class Exchange {
-  latestCandleStick;
+  runningCandleStick;
+  candleSticks;
   ws;
   roundRepository;
 
@@ -13,6 +14,7 @@ export default class Exchange {
     this.apiUrl = apiUrl;
     this.wsUrl = wsUrl;
     this.roundRepository = roundRepository;
+    this.candleSticks = [];
 
     this.handleMessage = this.handleMessage.bind(this);
     this.handleWSError = this.handleWSError.bind(this);
@@ -20,13 +22,11 @@ export default class Exchange {
   }
 
   async getKlines() {
-    this.latestCandleStick = (
-      await this.roundRepository.findOne({}, "result", {
-        sort: { id: -1 },
-      })
-    )?.result;
     const responseData = await axios.get(this.apiUrl);
-    return this.mapRestApiDataToCandleSticks(responseData.data);
+    const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
+    this.runningCandleStick = candleSticks[candleSticks.length - 1];
+    this.candleSticks = candleSticks;
+    return candleSticks;
   }
 
   mapRestApiDataToCandleSticks(data) {}
@@ -57,22 +57,26 @@ export default class Exchange {
   handleOpenWS() {}
   async handleMessage(data) {}
   async updateLatestCandleStick(candle) {
-    console.log(this.roundRepository);
     if (
-      this.latestCandleStick &&
-      this.latestCandleStick.time.getTime() === candle.time.getTime()
+      this.runningCandleStick &&
+      this.runningCandleStick.time.getTime() === candle.time.getTime()
     ) {
       await this.roundRepository.updateOne(
         { "result.time": candle.time },
         { result: candle }
       );
+
+      this.candleSticks[this.candleSticks.length - 1] = candle;
     } else {
       await this.roundRepository.create({
         result: candle,
         time: new Date(),
       });
+
+      this.candleSticks.push(candle);
+      this.candleSticks.shift();
     }
-    this.latestCandleStick = candle;
+    this.runningCandleStick = candle;
   }
 }
 
