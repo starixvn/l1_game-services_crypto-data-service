@@ -22,11 +22,16 @@ export default class Exchange {
   }
 
   async getKlines() {
-    const responseData = await axios.get(this.apiUrl);
-    const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
-    this.runningCandleStick = candleSticks[candleSticks.length - 1];
-    this.candleSticks = candleSticks;
-    return candleSticks;
+    try {
+      const responseData = await axios.get(this.apiUrl);
+      const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
+      this.runningCandleStick = candleSticks[candleSticks.length - 1];
+      this.candleSticks = candleSticks;
+    } catch (exception) {
+      logger.log(exception, "error");
+    }
+
+    return this.candleSticks;
   }
 
   mapRestApiDataToCandleSticks(data) {}
