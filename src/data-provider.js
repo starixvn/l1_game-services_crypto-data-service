@@ -1,39 +1,14 @@
 import CandleStick from "./candle-stick";
-import { BinanceExchange, HuobiExchange, MexcExchange } from "./exchange";
-import CryptoExchanges from "./models/crypto-exchange";
-import {
-  BinanceRounds,
-  HuobiRounds,
-  MexcRounds,
-} from "./models/exchange-candle";
 
 export default class DataProvider {
-  constructor() {
-    this.binanceExchange = new BinanceExchange(
-      "https://api.binance.com/api/v3/klines?interval=1m&symbol=BTCUSDT&limit=30",
-      "wss://stream.binance.com:9443/ws/btcusdt@kline_1m",
-      BinanceRounds
-    );
-
-    this.huobiExchange = new HuobiExchange(
-      "https://api.huobi.pro/market/history/kline?symbol=btcusdt&period=1min&size=30",
-      "wss://api.huobi.pro/ws",
-      HuobiRounds
-    );
-
-    this.mexcExchange = new MexcExchange(
-      "https://www.mexc.com/open/api/v2/market/kline?symbol=BTC_USDT&interval=1m&limit=30",
-      "wss://contract.mexc.com/ws",
-      MexcRounds
-    );
-
-    this.cryptoExchangeRepository = CryptoExchanges;
-
+  constructor(exchanges, cryptoExchangeRepository) {
+    this.cryptoExchangeRepository = cryptoExchangeRepository;
+    this.exchanges = exchanges;
     this.averageCandleSticks = [];
   }
 
   async init() {
-    await this.initKlineData();
+    await this.initGettingLatestCandleSticks();
     this.initWebSocket();
     this.initCron();
   }
@@ -45,17 +20,17 @@ export default class DataProvider {
   }
 
   initWebSocket() {
-    this.binanceExchange.initWebSocket();
-    this.huobiExchange.initWebSocket();
-    this.mexcExchange.initWebSocket();
+    Object.values(this.exchanges).forEach((exchange) =>
+      exchange.initWebSocket()
+    );
   }
 
-  async initKlineData() {
-    await Promise.all([
-      this.binanceExchange.getKlines(),
-      this.huobiExchange.getKlines(),
-      this.mexcExchange.getKlines(),
-    ]);
+  async initGettingLatestCandleSticks() {
+    await Promise.all(
+      Object.values(this.exchanges).map((exchange) =>
+        exchange.getLatestCandleSticks()
+      )
+    );
   }
 
   calculateAverageCandleStick(candleSticks) {
@@ -78,23 +53,20 @@ export default class DataProvider {
   }
 
   updateAverageCandleSticks() {
+    const exchangeCandleSticks = Object.values(this.exchanges).map(
+      (exchange) => exchange.candleSticks
+    );
     for (let i = 0; i < 30; i++) {
-      const binance = this.binanceExchange.candleSticks[i];
-      const huobi = this.huobiExchange.candleSticks[i];
-      const mexc = this.mexcExchange.candleSticks[i];
-
       this.averageCandleSticks.push(
-        this.calculateAverageCandleStick([binance, huobi, mexc])
+        this.calculateAverageCandleStick(exchangeCandleSticks.map((x) => x[i]))
       );
     }
   }
 
   async updateExchangeData() {
-    const runningCandleSticks = [
-      this.binanceExchange.runningCandleStick,
-      this.huobiExchange.runningCandleStick,
-      this.mexcExchange.runningCandleStick,
-    ];
+    const runningCandleSticks = Object.values(this.exchanges).map(
+      (exchange) => exchange.runningCandleStick
+    );
 
     if (
       runningCandleSticks.every(
@@ -107,6 +79,7 @@ export default class DataProvider {
 
       const runningCandleStick =
         this.calculateAverageCandleStick(runningCandleSticks);
+      //console.log(runningCandleStick);
 
       if (
         this.averageCandleSticks[
@@ -123,9 +96,10 @@ export default class DataProvider {
       const updateObj = {
         runningCandleStick,
         averageCandleSticks: this.averageCandleSticks,
-        binance: this.binanceExchange.candleSticks,
-        huobi: this.huobiExchange.candleSticks,
-        mexc: this.mexcExchange.candleSticks,
+        binance: this.exchanges.binanceExchange.candleSticks,
+        huobi: this.exchanges.huobiExchange.candleSticks,
+        mexc: this.exchanges.mexcExchange.candleSticks,
+        okex: this.exchanges.okexExchange.candleSticks,
         updatedTime: new Date(),
       };
 

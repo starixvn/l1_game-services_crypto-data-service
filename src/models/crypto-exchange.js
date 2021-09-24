@@ -5,6 +5,7 @@ const Schema = new mongoose.Schema({
   binance: { type: Array, required: true },
   huobi: { type: Array, required: true },
   mexc: { type: Array, required: true },
+  okex: { type: Array, required: true },
   averageCandleSticks: { type: Array, required: true },
   runningCandleStick: { type: Object, required: true },
 });
