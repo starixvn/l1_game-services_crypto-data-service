@@ -53,7 +53,7 @@ export default class MexcExchange extends Exchange {
         jsonObj.data.l
       );
 
-      await this.updateLatestCandleStick(candle);
+      this.updateLatestCandleStick(candle);
     }
   }
 }

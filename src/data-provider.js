@@ -3,6 +3,7 @@ import CandleStick from "./candle-stick";
 export default class DataProvider {
   constructor(exchanges, cryptoExchangeRepository) {
     this.cryptoExchangeRepository = cryptoExchangeRepository;
+    this.exchangeArr = Object.values(exchanges);
     this.exchanges = exchanges;
     this.averageCandleSticks = [];
   }
@@ -20,31 +21,28 @@ export default class DataProvider {
   }
 
   initWebSocket() {
-    Object.values(this.exchanges).forEach((exchange) =>
-      exchange.initWebSocket()
-    );
+    this.exchangeArr.forEach((exchange) => exchange.initWebSocket());
   }
 
   async initGettingLatestCandleSticks() {
     await Promise.all(
-      Object.values(this.exchanges).map((exchange) =>
-        exchange.getLatestCandleSticks()
-      )
+      this.exchangeArr.map((exchange) => exchange.getLatestCandleSticks())
     );
+
+    this.updateAverageCandleSticks();
   }
 
-  calculateAverageCandleStick(candleSticks) {
+  calculateAverageCandleStick(candleSticks, time) {
     const total = candleSticks.reduce((prev, cur) => ({
       open: prev.open + cur.open,
       close: prev.close + cur.close,
       high: prev.high + cur.high,
       low: prev.low + cur.low,
     }));
-
-    const length = candleSticks.length;
+    const { length } = candleSticks;
 
     return new CandleStick(
-      candleSticks[0].time,
+      time,
       total.open / length,
       total.close / length,
       total.high / length,
@@ -53,63 +51,91 @@ export default class DataProvider {
   }
 
   updateAverageCandleSticks() {
-    const exchangeCandleSticks = Object.values(this.exchanges).map(
+    const exchangeCandleSticks = this.exchangeArr.map(
       (exchange) => exchange.candleSticks
     );
-    for (let i = 0; i < 30; i++) {
+
+    const now = new Date();
+    now.setSeconds(0, 0);
+
+    for (let i = 29; i >= 0; i--) {
       this.averageCandleSticks.push(
-        this.calculateAverageCandleStick(exchangeCandleSticks.map((x) => x[i]))
+        this.calculateAverageCandleStick(
+          exchangeCandleSticks.map((x) => x[i]),
+          now
+        )
       );
+
+      now.setMinutes(now.getMinutes() - 1);
+    }
+  }
+
+  updateRunningCandleStick() {
+    const runningCandleSticks = this.exchangeArr.map(
+      (exchange) => exchange.runningCandleStick
+    );
+
+    const now = new Date();
+    now.setSeconds(0, 0);
+    const runningCandleStick = this.calculateAverageCandleStick(
+      runningCandleSticks,
+      now
+    );
+
+    if (
+      this.runningCandleStick &&
+      this.runningCandleStick.time.getTime() ===
+        runningCandleStick.time.getTime()
+    ) {
+      this.runningCandleStick.close = runningCandleStick.close;
+      this.runningCandleStick.high = runningCandleStick.high;
+      this.runningCandleStick.low = runningCandleStick.low;
+    } else {
+      this.runningCandleStick = runningCandleStick;
     }
   }
 
   async updateExchangeData() {
-    const runningCandleSticks = Object.values(this.exchanges).map(
-      (exchange) => exchange.runningCandleStick
-    );
+    this.updateRunningCandleStick();
 
-    if (
-      runningCandleSticks.every(
-        (x) => x && x.time.getTime() === runningCandleSticks[0].time.getTime()
-      )
-    ) {
-      if (this.averageCandleSticks.length === 0) {
-        this.updateAverageCandleSticks();
-      }
+    const now = new Date();
 
-      const runningCandleStick =
-        this.calculateAverageCandleStick(runningCandleSticks);
-      //console.log(runningCandleStick);
+    if (now.getSeconds() === 0) {
+      console.log("add");
 
-      if (
-        this.averageCandleSticks[
-          this.averageCandleSticks.length - 1
-        ].time.getTime() < runningCandleStick.time.getTime()
-      ) {
-        this.averageCandleSticks.shift();
-        this.averageCandleSticks.push(runningCandleStick);
-      } else {
-        this.averageCandleSticks[this.averageCandleSticks.length - 1] =
-          runningCandleStick;
-      }
+      this.averageCandleSticks.shift();
+      this.averageCandleSticks.push(this.runningCandleStick);
+      this.exchangeArr.forEach((exchange) => {
+        exchange.candleSticks.shift();
+        exchange.candleSticks.push(exchange.runningCandleStick);
+      });
+    } else {
+      console.log("update");
+      this.averageCandleSticks[this.averageCandleSticks.length - 1] =
+        this.runningCandleStick;
 
-      const updateObj = {
-        runningCandleStick,
-        averageCandleSticks: this.averageCandleSticks,
-        binance: this.exchanges.binanceExchange.candleSticks,
-        huobi: this.exchanges.huobiExchange.candleSticks,
-        mexc: this.exchanges.mexcExchange.candleSticks,
-        okex: this.exchanges.okexExchange.candleSticks,
-        updatedTime: new Date(),
-      };
-
-      await this.cryptoExchangeRepository.updateOne(
-        {},
-        {
-          $set: updateObj,
-        },
-        { upsert: true, setDefaultsOnInsert: true }
-      );
+      this.exchangeArr.forEach((exchange) => {
+        exchange.candleSticks[exchange.candleSticks.length - 1] =
+          exchange.runningCandleStick;
+      });
     }
+
+    const updateObj = {
+      runningCandleStick: this.runningCandleStick,
+      averageCandleSticks: this.averageCandleSticks,
+      binance: this.exchanges.binanceExchange.candleSticks,
+      huobi: this.exchanges.huobiExchange.candleSticks,
+      mexc: this.exchanges.mexcExchange.candleSticks,
+      okex: this.exchanges.okexExchange.candleSticks,
+      updatedTime: new Date(),
+    };
+
+    await this.cryptoExchangeRepository.updateOne(
+      {},
+      {
+        $set: updateObj,
+      },
+      { upsert: true, setDefaultsOnInsert: true }
+    );
   }
 }

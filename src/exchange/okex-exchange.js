@@ -35,7 +35,7 @@ export default class OkexExchange extends Exchange {
           parseFloat(kLine[3])
         );
 
-        await this.updateLatestCandleStick(candle);
+        this.updateLatestCandleStick(candle);
       }
     }
   }

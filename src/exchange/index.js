@@ -59,16 +59,7 @@ export default class Exchange {
 
   handleOpenWS() {}
   async handleMessage(data) {}
-  async updateLatestCandleStick(candle) {
-    if (
-      this.runningCandleStick &&
-      this.runningCandleStick.time.getTime() === candle.time.getTime()
-    ) {
-      this.candleSticks[this.candleSticks.length - 1] = candle;
-    } else {
-      this.candleSticks.push(candle);
-      this.candleSticks.shift();
-    }
+  updateLatestCandleStick(candle) {
     this.runningCandleStick = candle;
   }
 }

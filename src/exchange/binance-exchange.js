@@ -15,7 +15,7 @@ export default class BinanceExchange extends Exchange {
         parseFloat(kLine["l"])
       );
 
-      await this.updateLatestCandleStick(candle);
+      this.updateLatestCandleStick(candle);
     }
   }
 
