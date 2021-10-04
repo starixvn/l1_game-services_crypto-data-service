@@ -101,8 +101,6 @@ export default class DataProvider {
     const now = new Date();
 
     if (now.getSeconds() === 0) {
-      console.log("add");
-
       this.averageCandleSticks.shift();
       this.averageCandleSticks.push(this.runningCandleStick);
       this.exchangeArr.forEach((exchange) => {
@@ -110,7 +108,6 @@ export default class DataProvider {
         exchange.candleSticks.push(exchange.runningCandleStick);
       });
     } else {
-      console.log("update");
       this.averageCandleSticks[this.averageCandleSticks.length - 1] =
         this.runningCandleStick;
 
