@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.4",
+    "mathjs": "^9.5.0",
     "mongoose": "5.13.9",
     "sc-common": "^1.7.0",
     "ws": "^8.2.1"

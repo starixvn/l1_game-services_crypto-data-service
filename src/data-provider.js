@@ -1,4 +1,5 @@
 import CandleStick from "./candle-stick";
+import { round } from "mathjs";
 
 export default class DataProvider {
   constructor(exchanges, cryptoExchangeRepository) {
@@ -43,10 +44,10 @@ export default class DataProvider {
 
     return new CandleStick(
       time,
-      total.open / length,
-      total.close / length,
-      total.high / length,
-      total.low / length
+      round(total.open / length, 2),
+      round(total.close / length, 2),
+      round(total.high / length, 2),
+      round(total.low / length, 2)
     );
   }
 
@@ -59,13 +60,12 @@ export default class DataProvider {
     now.setSeconds(0, 0);
 
     for (let i = 29; i >= 0; i--) {
-      this.averageCandleSticks.push(
+      this.averageCandleSticks.unshift(
         this.calculateAverageCandleStick(
           exchangeCandleSticks.map((x) => x[i]),
           now
         )
       );
-
       now.setMinutes(now.getMinutes() - 1);
     }
   }
@@ -87,9 +87,7 @@ export default class DataProvider {
       this.runningCandleStick.time.getTime() ===
         runningCandleStick.time.getTime()
     ) {
-      this.runningCandleStick.close = runningCandleStick.close;
-      this.runningCandleStick.high = runningCandleStick.high;
-      this.runningCandleStick.low = runningCandleStick.low;
+      this.runningCandleStick = runningCandleStick;
     } else {
       this.runningCandleStick = runningCandleStick;
     }
