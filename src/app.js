@@ -7,13 +7,25 @@ import BinanceExchange from "./exchange/binance-exchange";
 import HuobiExchange from "./exchange/huobi-exchange";
 import MexcExchange from "./exchange/mexc-exchange";
 import OkexExchange from "./exchange/okex-exchange";
+import express from "express";
+import http from "http";
 
-const run = async () => {
-  await middlewares.database.configureDatabase(mongoose, appConfigs.database);
-  if (appConfigs.enabledLogs) {
-    logger.start(appConfigs.sentry);
-  }
+function initHttpServer() {
+  const app = express();
+  app.set("port", appConfigs.hostingPort);
+  app.get("/", (req, res, next) => {
+    res.send(`I'm Crypto Data Service!`);
+  });
 
+  const httpServer = http.createServer(app);
+  httpServer.listen(app.get("port"), async () => {
+    console.log(
+      `Express server started and running on port ${app.get("port")}!`
+    );
+  });
+}
+
+async function initDataProvider() {
   const binanceExchange = new BinanceExchange(
     "https://api.binance.com/api/v3/klines?interval=1m&symbol=BTCUSDT&limit=30",
     "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
@@ -43,6 +55,16 @@ const run = async () => {
     CryptoExchanges
   );
   await dataProvider.init();
+}
+
+const run = async () => {
+  initHttpServer();
+  await middlewares.database.configureDatabase(mongoose, appConfigs.database);
+  if (appConfigs.enabledLogs) {
+    logger.start(appConfigs.sentry);
+  }
+
+  await initDataProvider();
 };
 
 await run();

@@ -1,5 +1,6 @@
 export default {
-  appConfigs: false,
+  hostingPort: 5000,
+  enabledLogs: false,
   database: {
     url: "mongodb://localhost:27017",
     options: {
