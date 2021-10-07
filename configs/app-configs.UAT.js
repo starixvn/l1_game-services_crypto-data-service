@@ -1,4 +1,5 @@
 export default {
+  hostingPort: 5000,
   enabledLogs: true,
   database: {
     url: "mongodb://lmn_backend:LmnBackend%4022027@10.99.99.187:27201/?replicaSet=SabaUAT",

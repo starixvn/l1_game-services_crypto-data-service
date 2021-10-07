@@ -1,4 +1,5 @@
 export default {
+    hostingPort: 5000,
     enabledLogs: true,
     database: {
         url: "mongodb://lmn_backend:LmnBackend@10.10.50.13:27101/?replicaSet=L1Local",
