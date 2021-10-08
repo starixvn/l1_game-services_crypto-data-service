@@ -77,60 +77,54 @@ export default class DataProvider {
 
     const now = new Date();
     now.setSeconds(0, 0);
-    const runningCandleStick = this.calculateAverageCandleStick(
+    this.runningCandleStick = this.calculateAverageCandleStick(
       runningCandleSticks,
       now
     );
-
-    if (
-      this.runningCandleStick &&
-      this.runningCandleStick.time.getTime() ===
-        runningCandleStick.time.getTime()
-    ) {
-      this.runningCandleStick = runningCandleStick;
-    } else {
-      this.runningCandleStick = runningCandleStick;
-    }
   }
 
   async updateExchangeData() {
-    this.updateRunningCandleStick();
+    try {
+      this.updateRunningCandleStick();
 
-    const now = new Date();
+      const now = new Date();
 
-    if (now.getSeconds() === 0) {
-      this.averageCandleSticks.shift();
-      this.averageCandleSticks.push(this.runningCandleStick);
-      this.exchangeArr.forEach((exchange) => {
-        exchange.candleSticks.shift();
-        exchange.candleSticks.push(exchange.runningCandleStick);
-      });
-    } else {
-      this.averageCandleSticks[this.averageCandleSticks.length - 1] =
-        this.runningCandleStick;
+      if (now.getSeconds() === 0) {
+        this.averageCandleSticks.shift();
+        this.averageCandleSticks.push(this.runningCandleStick);
+        this.exchangeArr.forEach((exchange) => {
+          exchange.candleSticks.shift();
+          exchange.candleSticks.push(exchange.runningCandleStick);
+        });
+      } else {
+        this.averageCandleSticks[this.averageCandleSticks.length - 1] =
+          this.runningCandleStick;
 
-      this.exchangeArr.forEach((exchange) => {
-        exchange.candleSticks[exchange.candleSticks.length - 1] =
-          exchange.runningCandleStick;
-      });
+        this.exchangeArr.forEach((exchange) => {
+          exchange.candleSticks[exchange.candleSticks.length - 1] =
+            exchange.runningCandleStick;
+        });
+      }
+
+      const updateObj = {
+        runningCandleStick: this.runningCandleStick,
+        averageCandleSticks: this.averageCandleSticks,
+        binance: this.exchanges.binanceExchange.candleSticks,
+        huobi: this.exchanges.huobiExchange.candleSticks,
+        mexc: this.exchanges.mexcExchange.candleSticks,
+        okex: this.exchanges.okexExchange.candleSticks,
+        updatedTime: new Date(),
+      };
+
+      await this.cryptoExchangeRepository.updateOne(
+        {},
+        {
+          $set: updateObj,
+        },
+        { upsert: true, setDefaultsOnInsert: true }
+      );
+    } catch (exception) {
+      logger.log(exception, "error");
     }
-
-    const updateObj = {
-      runningCandleStick: this.runningCandleStick,
-      averageCandleSticks: this.averageCandleSticks,
-      binance: this.exchanges.binanceExchange.candleSticks,
-      huobi: this.exchanges.huobiExchange.candleSticks,
-      mexc: this.exchanges.mexcExchange.candleSticks,
-      okex: this.exchanges.okexExchange.candleSticks,
-      updatedTime: new Date(),
-    };
-
-    await this.cryptoExchangeRepository.updateOne(
-      {},
-      {
-        $set: updateObj,
-      },
-      { upsert: true, setDefaultsOnInsert: true }
-    );
   }
 }
