@@ -2,8 +2,14 @@ import CandleStick from "./candle-stick";
 import { round } from "mathjs";
 
 export default class DataProvider {
-  constructor(exchanges, cryptoExchangeRepository) {
+  constructor(
+    exchanges,
+    cryptoExchangeRepository,
+    cryptoCandleSticksRepository
+  ) {
     this.cryptoExchangeRepository = cryptoExchangeRepository;
+    this.cryptoCandleSticksRepository = cryptoCandleSticksRepository;
+
     this.exchangeArr = Object.values(exchanges);
     this.exchanges = exchanges;
     this.averageCandleSticks = [];
@@ -59,7 +65,7 @@ export default class DataProvider {
     const now = new Date();
     now.setSeconds(0, 0);
 
-    for (let i = 29; i >= 0; i--) {
+    for (let i = 59; i >= 0; i--) {
       this.averageCandleSticks.unshift(
         this.calculateAverageCandleStick(
           exchangeCandleSticks.map((x) => x[i]),
@@ -116,13 +122,22 @@ export default class DataProvider {
         updatedTime: new Date(),
       };
 
-      await this.cryptoExchangeRepository.updateOne(
-        {},
-        {
-          $set: updateObj,
-        },
-        { upsert: true, setDefaultsOnInsert: true }
-      );
+      await Promise.all([
+        this.cryptoCandleSticksRepository.updateOne(
+          { time: this.runningCandleStick.time },
+          {
+            $set: this.runningCandleStick,
+          },
+          { upsert: true, setDefaultsOnInsert: true }
+        ),
+        this.cryptoExchangeRepository.updateOne(
+          {},
+          {
+            $set: updateObj,
+          },
+          { upsert: true, setDefaultsOnInsert: true }
+        ),
+      ]);
     } catch (exception) {
       logger.log(exception, "error");
     }
