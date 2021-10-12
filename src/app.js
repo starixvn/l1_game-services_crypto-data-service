@@ -4,11 +4,8 @@ import mongoose from "mongoose";
 import { logger, middlewares } from "sc-common";
 
 import appConfigs from "./app-configs";
-import DataProvider from "./data-provider";
 import ContainerRegistry from "./container-registry";
 import exchangeSettings from "./exchange/exchange-settings";
-import CryptoCandleSticks from "./models/crypto-candlestick";
-import CryptoExchanges from "./models/crypto-exchange";
 
 function initHttpServer() {
     const app = express();
@@ -24,13 +21,9 @@ function initHttpServer() {
 }
 
 async function initDataProvider() {
-    const binanceExchange = new BinanceExchange(exchangeSettings.binance);
-    const huobiExchange = new HuobiExchange(exchangeSettings.huobi);
-    const mexcExchange = new MexcExchange(exchangeSettings.mexc);
-    const okexExchange = new OkexExchange(exchangeSettings.okex);
-  const container = new ContainerRegistry().register();
+    const container = new ContainerRegistry().register(exchangeSettings);
 
-  const dataProvider = new DataProvider(container);
+    const dataProvider = container.resolve("dataProvider");
     await dataProvider.init();
 }
 

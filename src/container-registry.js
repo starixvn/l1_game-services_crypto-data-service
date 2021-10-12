@@ -1,58 +1,57 @@
 import { asClass, asValue, createContainer, InjectionMode } from "awilix";
-import CryptoCandleSticks from "./models/crypto-candlestick";
-import CryptoExchanges from "./models/crypto-exchange";
+
+import DataProvider from "./data-provider";
 import BinanceExchange from "./exchange/binance-exchange";
 import HuobiExchange from "./exchange/huobi-exchange";
 import MexcExchange from "./exchange/mexc-exchange";
 import OkexExchange from "./exchange/okex-exchange";
+import CryptoCandleSticks from "./models/crypto-candlestick";
+import CryptoExchanges from "./models/crypto-exchange";
 
 export default class ContainerRegistry {
-  /**
-   * @param {InjectionMode} defaultInjectionMode
-   */
-  constructor(defaultInjectionMode = InjectionMode.CLASSIC) {
-    this.container = createContainer({ injectionMode: defaultInjectionMode });
-  }
+    /**
+     * @param {InjectionMode} defaultInjectionMode
+     */
+    constructor(defaultInjectionMode = InjectionMode.CLASSIC) {
+        this.container = createContainer({ injectionMode: defaultInjectionMode });
+    }
 
-  register() {
-    this.registerModels();
-    this.registerExchanges();
-    return this.container;
-  }
+    /**
+     * @param {Object} exchangeSettings
+     */
 
-  registerExchanges() {
-    this.container.register({
-      binanceExchange: asValue(
-        new BinanceExchange(
-          "https://api.binance.com/api/v3/klines?interval=1m&symbol=BTCUSDT&limit=60",
-          "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
-        )
-      ),
-      huobiExchange: asValue(
-        new HuobiExchange(
-          "https://api.huobi.pro/market/history/kline?symbol=btcusdt&period=1min&size=60",
-          "wss://api.huobi.pro/ws"
-        )
-      ),
-      mexcExchange: asValue(
-        new MexcExchange(
-          "https://www.mexc.com/open/api/v2/market/kline?symbol=BTC_USDT&interval=1m&limit=60",
-          "wss://contract.mexc.com/ws"
-        )
-      ),
-      okexExchange: asValue(
-        new OkexExchange(
-          "https://www.okex.com/api/v5/market/candles?limit=60&bar=1m&instId=BTC-USDT",
-          "wss://ws.okex.com:8443/ws/v5/public"
-        )
-      ),
-    });
-  }
+    register(exchangeSettings) {
+        this.container.register({
+            exchangeSettings: asValue(exchangeSettings),
+            binanceSettings: asValue(exchangeSettings.binance),
+            huobiSettings: asValue(exchangeSettings.huobi),
+            mexcSettings: asValue(exchangeSettings.mexc),
+            okexSettings: asValue(exchangeSettings.okex),
+        });
 
-  registerModels() {
-    this.container.register({
-      cryptoExchangeRepository: asValue(CryptoExchanges),
-      cryptoCandleSticksRepository: asValue(CryptoCandleSticks),
-    });
-  }
+        this.registerModels();
+        this.registerExchanges();
+
+        return this.container;
+    }
+
+    registerExchanges() {
+        this.container.register({
+            dataProvider: asClass(DataProvider).singleton(),
+        });
+
+        this.container.register({
+            binanceExchange: asClass(BinanceExchange).singleton(),
+            huobiExchange: asClass(HuobiExchange).singleton(),
+            mexcExchange: asClass(MexcExchange).singleton(),
+            okexExchange: asClass(OkexExchange).singleton(),
+        });
+    }
+
+    registerModels() {
+        this.container.register({
+            cryptoExchangeRepository: asValue(CryptoExchanges),
+            cryptoCandleSticksRepository: asValue(CryptoCandleSticks),
+        });
+    }
 }

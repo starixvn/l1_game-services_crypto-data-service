@@ -5,6 +5,10 @@ import Exchange from ".";
 import CandleStick from "../candle-stick";
 
 export default class HuobiExchange extends Exchange {
+    constructor(huobiSettings) {
+        super(huobiSettings);
+    }
+
     handleOpenWS() {
         this.ws.send(
             JSON.stringify({

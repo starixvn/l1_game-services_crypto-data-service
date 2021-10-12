@@ -6,12 +6,9 @@ export default class Exchange {
     runningCandleStick;
     candleSticks;
     ws;
-    roundRepository;
 
-    constructor(settings, roundRepository) {
-        this.apiUrl = settings.api;
-        this.wsUrl = settings.ws;
-        this.roundRepository = roundRepository;
+    constructor(settings) {
+        this.settings = settings;
         this.candleSticks = [];
 
         this.handleMessage = this.handleMessage.bind(this);
@@ -21,7 +18,7 @@ export default class Exchange {
 
     async getLatestCandleSticks() {
         try {
-            const responseData = await axios.get(this.apiUrl);
+            const responseData = await axios.get(this.settings.api);
             const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
             this.runningCandleStick = candleSticks[candleSticks.length - 1];
             this.candleSticks = candleSticks;
@@ -35,7 +32,7 @@ export default class Exchange {
     mapRestApiDataToCandleSticks(data) {}
 
     initWebSocket() {
-        this.ws = new WebSocket(this.wsUrl);
+        this.ws = new WebSocket(this.settings.ws);
 
         this.ws.on("open", () => {
             this.handleOpenWS();
