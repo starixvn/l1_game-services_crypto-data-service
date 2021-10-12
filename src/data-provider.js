@@ -3,15 +3,22 @@ import { round } from "mathjs";
 import { logger } from "sc-common";
 
 export default class DataProvider {
-  constructor(
-    exchanges,
-    cryptoExchangeRepository,
-    cryptoCandleSticksRepository
-  ) {
-    this.cryptoExchangeRepository = cryptoExchangeRepository;
-    this.cryptoCandleSticksRepository = cryptoCandleSticksRepository;
+  constructor(container) {
+    this.cryptoExchangeRepository = container.resolve(
+      "cryptoExchangeRepository"
+    );
+    this.cryptoCandleSticksRepository = container.resolve(
+     "cryptoCandleSticksRepository"
+    );
 
-    this.exchangeArr = Object.values(exchanges);
+    this.exchanges = {
+      binanceExchange: container.resolve("binanceExchange"),
+      huobiExchange: container.resolve("huobiExchange"),
+      mexcExchange: container.resolve("mexcExchange"),
+      okexExchange: container.resolve("okexExchange"),
+    };
+
+    this.exchangeArr = Object.values(this.exchanges);
     this.exchanges = exchanges;
     this.averageCandleSticks = [];
   }

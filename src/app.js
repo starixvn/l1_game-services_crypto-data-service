@@ -3,10 +3,7 @@ import { middlewares, logger } from "sc-common";
 import mongoose from "mongoose";
 import appConfigs from "./app-configs";
 import CryptoExchanges from "./models/crypto-exchange";
-import BinanceExchange from "./exchange/binance-exchange";
-import HuobiExchange from "./exchange/huobi-exchange";
-import MexcExchange from "./exchange/mexc-exchange";
-import OkexExchange from "./exchange/okex-exchange";
+import ContainerRegistry from "./container-registry";
 import express from "express";
 import http from "http";
 import CryptoCandleSticks from "./models/crypto-candlestick";
@@ -27,35 +24,9 @@ function initHttpServer() {
 }
 
 async function initDataProvider() {
-  const binanceExchange = new BinanceExchange(
-    "https://api.binance.com/api/v3/klines?interval=1m&symbol=BTCUSDT&limit=60",
-    "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
-  );
+  const container = new ContainerRegistry().register();
 
-  const huobiExchange = new HuobiExchange(
-    "https://api.huobi.pro/market/history/kline?symbol=btcusdt&period=1min&size=60",
-    "wss://api.huobi.pro/ws"
-  );
-
-  const mexcExchange = new MexcExchange(
-    "https://www.mexc.com/open/api/v2/market/kline?symbol=BTC_USDT&interval=1m&limit=60",
-    "wss://contract.mexc.com/ws"
-  );
-
-  const okexExchange = new OkexExchange(
-    "https://www.okex.com/api/v5/market/candles?limit=60&bar=1m&instId=BTC-USDT",
-    "wss://ws.okex.com:8443/ws/v5/public"
-  );
-  const dataProvider = new DataProvider(
-    {
-      binanceExchange,
-      huobiExchange,
-      mexcExchange,
-      okexExchange,
-    },
-    CryptoExchanges,
-    CryptoCandleSticks
-  );
+  const dataProvider = new DataProvider(container);
   await dataProvider.init();
 }
 
