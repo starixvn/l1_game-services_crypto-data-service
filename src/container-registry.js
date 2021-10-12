@@ -16,6 +16,7 @@ export default class ContainerRegistry {
 
   register() {
     this.registerModels();
+    return this.container;
   }
 
   registerExchanges() {
