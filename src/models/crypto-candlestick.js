@@ -2,10 +2,11 @@ import mongoose from "mongoose";
 
 const Schema = new mongoose.Schema({
   time: { type: Date, default: new Date() },
-  open: { type: Number, required: true },
-  close: { type: Number, required: true },
-  high: { type: Number, required: true },
-  low: { type: Number, required: true },
+  average: { type: Object, required: true },
+  binance: { type: Object, required: true },
+  huobi: { type: Object, required: true },
+  mexc: { type: Object, required: true },
+  okex: { type: Object, required: true },
 });
 
 const CryptoCandleSticks = mongoose.model("crypto_candlesticks", Schema);

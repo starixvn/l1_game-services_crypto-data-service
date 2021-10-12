@@ -1,5 +1,6 @@
 import CandleStick from "./candle-stick";
 import { round } from "mathjs";
+import { logger } from "sc-common";
 
 export default class DataProvider {
   constructor(
@@ -112,28 +113,33 @@ export default class DataProvider {
         });
       }
 
-      const updateObj = {
-        runningCandleStick: this.runningCandleStick,
-        averageCandleSticks: this.averageCandleSticks,
-        binance: this.exchanges.binanceExchange.candleSticks,
-        huobi: this.exchanges.huobiExchange.candleSticks,
-        mexc: this.exchanges.mexcExchange.candleSticks,
-        okex: this.exchanges.okexExchange.candleSticks,
-        updatedTime: new Date(),
-      };
-
       await Promise.all([
         this.cryptoCandleSticksRepository.updateOne(
           { time: this.runningCandleStick.time },
           {
-            $set: this.runningCandleStick,
+            $set: {
+              time: this.runningCandleStick.time,
+              average: this.runningCandleStick,
+              binance: this.exchanges.binanceExchange.runningCandleStick,
+              huobi: this.exchanges.huobiExchange.runningCandleStick,
+              mexc: this.exchanges.mexcExchange.runningCandleStick,
+              okex: this.exchanges.okexExchange.runningCandleStick,
+            },
           },
           { upsert: true, setDefaultsOnInsert: true }
         ),
         this.cryptoExchangeRepository.updateOne(
           {},
           {
-            $set: updateObj,
+            $set: {
+              runningCandleStick: this.runningCandleStick,
+              averageCandleSticks: this.averageCandleSticks,
+              binance: this.exchanges.binanceExchange.candleSticks,
+              huobi: this.exchanges.huobiExchange.candleSticks,
+              mexc: this.exchanges.mexcExchange.candleSticks,
+              okex: this.exchanges.okexExchange.candleSticks,
+              updatedTime: new Date(),
+            },
           },
           { upsert: true, setDefaultsOnInsert: true }
         ),
