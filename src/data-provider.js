@@ -19,7 +19,6 @@ export default class DataProvider {
     };
 
     this.exchangeArr = Object.values(this.exchanges);
-    this.exchanges = exchanges;
     this.averageCandleSticks = [];
   }
 
