@@ -23,7 +23,6 @@ export default class HuobiExchange extends Exchange {
     }
 
     async handleMessage(data) {
-        ///const jsonObj = JSON.parse(data);
         zlib.unzip(data, async (err, buffer) => {
             if (err) {
                 logger.log(err, "error");
