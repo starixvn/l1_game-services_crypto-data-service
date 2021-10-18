@@ -46,12 +46,12 @@ export default class Exchange {
     }
 
     handleCloseWS(event) {
-        logger.logWarning(`Disconnected: ${event}`);
+        logger.logWarning(`${this.settings.name} - Disconnected: ${event}`);
         this.initWebSocket();
     }
 
     handleWSError(event) {
-        logger.logError(`error: ${event}`);
+        logger.logError(`${this.settings.name} - Error: ${event}`);
     }
 
     handleOpenWS() {}
