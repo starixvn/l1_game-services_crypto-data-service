@@ -15,4 +15,9 @@ export default {
     logIdentifier: "crypto-data-service",
     env: "UAT",
   },
+  proxy: {
+    host: "10.40.40.245",
+    port: 3128,
+    protocol: "http",
+  },
 };

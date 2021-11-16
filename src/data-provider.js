@@ -29,7 +29,6 @@ export default class DataProvider {
 
   async init() {
     await this.initGettingLatestCandleSticks();
-    this.exchangeArr.forEach(x => console.log(x.candleSticks));
 
     if (this.exchangeArr.every((x) => x.candleSticks.length > 0)) {
       this.updateAverageCandleSticks();
