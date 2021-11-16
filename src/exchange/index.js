@@ -16,14 +16,18 @@ export default class Exchange {
     this.handleMessage = this.handleMessage.bind(this);
     this.handleWSError = this.handleWSError.bind(this);
     this.handleCloseWS = this.handleCloseWS.bind(this);
+
+    if (appConfigs.proxy) {
+      this.proxyAgent = new HttpsProxyAgent(appConfigs.proxy);
+    }
   }
 
   async getLatestCandleSticks() {
     try {
       const axiosOptions = {};
 
-      if (appConfigs.proxy) {
-        axiosOptions.proxy = appConfigs.proxy;
+      if (this.proxyAgent) {
+        axiosOptions.httpsAgent = this.proxyAgent;
       }
 
       const responseData = await axios.get(this.settings.api, axiosOptions);
@@ -42,8 +46,8 @@ export default class Exchange {
   initWebSocket() {
     const wsOptions = {};
 
-    if (appConfigs.proxy) {
-      wsOptions.agent = new HttpsProxyAgent(appConfigs.proxy);
+    if (this.proxyAgent) {
+      wsOptions.agent = this.proxyAgent;
     }
 
     this.ws = new WebSocket(this.settings.ws, wsOptions);
