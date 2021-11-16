@@ -30,11 +30,7 @@ export default class DataProvider {
   async init() {
     await this.initGettingLatestCandleSticks();
 
-    if (
-      this.exchangeArr.every(
-        (x) => x.candleSticks.length > 0 && x.runningCandleStick
-      )
-    ) {
+    if (this.exchangeArr.every((x) => x.candleSticks.length > 0)) {
       this.updateAverageCandleSticks();
       this.initWebSocket();
       this.initCron();
