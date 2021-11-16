@@ -18,5 +18,6 @@ export default {
   proxy: {
     host: "10.2.252.100",
     port: 8801,
+    protocol: "http",
   },
 };
