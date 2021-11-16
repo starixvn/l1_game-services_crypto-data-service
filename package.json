@@ -16,6 +16,7 @@
     "axios": "^0.21.4",
     "cron": "^1.8.2",
     "express": "^4.17.1",
+    "https-proxy-agent": "^5.0.0",
     "mathjs": "^9.5.0",
     "mongoose": "5.13.9",
     "sc-common": "^1.7.0",

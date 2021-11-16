@@ -15,4 +15,8 @@ export default {
     logIdentifier: "crypto-data-service",
     env: "SIT",
   },
+  proxy: {
+    host: "10.2.252.100",
+    port: 8801,
+  },
 };
