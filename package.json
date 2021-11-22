@@ -6,12 +6,18 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node ./src/app.js"
+    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node ./src/app.js",
+    "reg": "npm set registry http://npm.lumigame.com"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "awilix": "^5.0.1",
     "axios": "^0.21.4",
+    "cron": "^1.8.2",
+    "express": "^4.17.1",
+    "https-proxy-agent": "^5.0.0",
+    "mathjs": "^9.5.0",
     "mongoose": "5.13.9",
     "sc-common": "^1.7.0",
     "ws": "^8.2.1"
