@@ -119,6 +119,7 @@ export default class DataProvider {
     this.updateRunningCandleStick();
     const now = new Date();
     if (now.getSeconds() === 0) {
+      this.checkCandleStickValue();
       this.averageCandleSticks.shift();
       this.averageCandleSticks.push(this.runningCandleStick);
       this.exchangeArr.forEach((exchange) => {
@@ -165,5 +166,25 @@ export default class DataProvider {
         { upsert: true, setDefaultsOnInsert: true }
       ),
     ]);
+  }
+
+  checkCandleStickValue() {
+    const lastCandle =
+      this.averageCandleSticks[this.averageCandleSticks.length - 2];
+    const currentCandle =
+      this.averageCandleSticks[this.averageCandleSticks.length - 1];
+
+    if (
+      lastCandle.open === currentCandle.open &&
+      lastCandle.close === currentCandle.close &&
+      lastCandle.high === currentCandle.high &&
+      lastCandle.low === currentCandle.low
+    ) {
+      logger.logCritical(
+        `The last 2 candles have the same result: ${JSON.stringify(
+          lastCandle
+        )} - ${JSON.stringify(currentCandle)}`
+      );
+    }
   }
 }
