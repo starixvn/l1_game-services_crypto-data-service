@@ -63,7 +63,6 @@ export default class DataProvider {
   }
 
   calculateAverageCandleStick(candleSticks, time) {
-    //TODO handle null exception
     const total = candleSticks
       .filter((x) => x)
       .reduce((prev, cur) => ({
@@ -106,13 +105,57 @@ export default class DataProvider {
     const runningCandleSticks = this.exchangeArr.map(
       (exchange) => exchange.runningCandleStick
     );
+    const { length } = runningCandleSticks;
 
     const now = new Date();
     now.setSeconds(0, 0);
-    this.runningCandleStick = this.calculateAverageCandleStick(
-      runningCandleSticks,
-      now
+    const currentTick = now.getTime();
+
+    let open = 0;
+    let close = 0;
+    let high = 0;
+    let low = 0;
+
+    runningCandleSticks.forEach((x) => {
+      if (x.time.getTime() === currentTick) {
+        open += x.open;
+      } else {
+        open += x.close;
+      }
+      close += x.close;
+      high += x.high;
+      low += x.low;
+    });
+
+    const candleStick = new CandleStick(
+      now,
+      round(open / length, 2),
+      round(close / length, 2),
+      round(high / length, 2),
+      round(low / length, 2)
     );
+
+    const { runningCandleStick } = this;
+
+    if (
+      runningCandleStick &&
+      runningCandleStick.time.getTime() === currentTick
+    ) {
+      candleStick.open = runningCandleStick.open;
+    }
+
+    const min = Math.min(candleStick.close, candleStick.open);
+    const max = Math.max(candleStick.close, candleStick.open);
+
+    if (candleStick.low > min) {
+      candleStick.low = min;
+    }
+
+    if (candleStick.high < max) {
+      candleStick.high = max;
+    }
+
+    this.runningCandleStick = candleStick;
   }
 
   async updateExchangeData() {
