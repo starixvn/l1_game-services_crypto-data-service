@@ -44,7 +44,6 @@ export default class DataProvider {
       logger.logError(
         "Cant get any data from all exchanges, retry in 60 seconds"
       );
-      console.log("caac");
       setTimeout(() => this.init(), 60000);
     }
   }
@@ -97,9 +96,9 @@ export default class DataProvider {
   }
 
   updateAverageCandleSticks(currentCandleSticks) {
-    const exchangeCandleSticks = this.exchangeArr.map(
-      (exchange) => exchange.candleSticks
-    );
+    const exchangeCandleSticks = this.exchangeArr
+      .filter((exchange) => exchange.candleSticks.length > 0)
+      .map((exchange) => exchange.candleSticks);
 
     const now = new Date();
     now.setSeconds(0, 0);
@@ -122,9 +121,9 @@ export default class DataProvider {
   }
 
   updateRunningCandleStick() {
-    const runningCandleSticks = this.exchangeArr.map(
-      (exchange) => exchange.runningCandleStick
-    );
+    const runningCandleSticks = this.exchangeArr
+      .filter((exchange) => exchange.runningCandleStick)
+      .map((exchange) => exchange.runningCandleStick);
     const { length } = runningCandleSticks;
 
     const now = new Date();
