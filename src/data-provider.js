@@ -28,12 +28,24 @@ export default class DataProvider {
   }
 
   async init() {
-    await this.initGettingLatestCandleSticks();
+    const currentCandleSticks = await this.cryptoCandleSticksRepository
+      .find({}, null, { limit: 60, sort: { time: -1 } })
+      .lean()
+      .exec();
+    currentCandleSticks.reverse();
 
-    if (this.exchangeArr.every((x) => x.candleSticks.length > 0)) {
-      this.updateAverageCandleSticks();
+    await this.initGettingLatestCandleSticks(currentCandleSticks);
+
+    if (this.exchangeArr.some((x) => x.candleSticks.length > 0)) {
+      this.updateAverageCandleSticks(currentCandleSticks);
       this.initWebSocket();
       this.initCron();
+    } else {
+      logger.logError(
+        "Cant get any data from all exchanges, retry in 60 seconds"
+      );
+      console.log("caac");
+      setTimeout(() => this.init(), 60000);
     }
   }
 
@@ -56,9 +68,11 @@ export default class DataProvider {
     this.exchangeArr.forEach((exchange) => exchange.initWebSocket());
   }
 
-  async initGettingLatestCandleSticks() {
+  async initGettingLatestCandleSticks(currentCandleSticks) {
     await Promise.all(
-      this.exchangeArr.map((exchange) => exchange.getLatestCandleSticks())
+      this.exchangeArr.map((exchange) =>
+        exchange.getLatestCandleSticks(currentCandleSticks)
+      )
     );
   }
 
@@ -82,7 +96,7 @@ export default class DataProvider {
     );
   }
 
-  updateAverageCandleSticks() {
+  updateAverageCandleSticks(currentCandleSticks) {
     const exchangeCandleSticks = this.exchangeArr.map(
       (exchange) => exchange.candleSticks
     );
@@ -91,11 +105,17 @@ export default class DataProvider {
     now.setSeconds(0, 0);
 
     for (let i = 59; i >= 0; i--) {
+      const current = currentCandleSticks.find(
+        (x) => x.time.getTime() === now.getTime()
+      );
+
       this.averageCandleSticks.unshift(
-        this.calculateAverageCandleStick(
-          exchangeCandleSticks.map((x) => x[i]),
-          now
-        )
+        current
+          ? current.average
+          : this.calculateAverageCandleStick(
+              exchangeCandleSticks.map((x) => x[i]),
+              now
+            )
       );
       now.setMinutes(now.getMinutes() - 1);
     }

@@ -11,6 +11,7 @@ export default class Exchange {
 
   constructor(settings) {
     this.settings = settings;
+    this.propName = settings.name.toLowerCase();
     this.candleSticks = [];
 
     this.handleMessage = this.handleMessage.bind(this);
@@ -22,7 +23,7 @@ export default class Exchange {
     }
   }
 
-  async getLatestCandleSticks() {
+  async getLatestCandleSticks(currentCandleSticks) {
     try {
       const axiosOptions = {};
 
@@ -31,14 +32,44 @@ export default class Exchange {
       }
 
       const responseData = await axios.get(this.settings.api, axiosOptions);
-      const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
-      this.runningCandleStick = candleSticks[candleSticks.length - 1];
-      this.candleSticks = candleSticks;
+      this.candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
     } catch (exception) {
       logger.log(exception, "error");
+    } finally {
+      this.mergeWithCurrentCandleSticks(currentCandleSticks);
+      this.runningCandleStick = this.candleSticks[this.candleSticks.length - 1];
     }
 
     return this.candleSticks;
+  }
+
+  mergeWithCurrentCandleSticks(currentCandleSticks) {
+    if (this.candleSticks.length > 0) {
+      for (let i = 0; i < this.candleSticks.length; i++) {
+        const currentCandleStick = currentCandleSticks.find(
+          (x) => x.time.getTime() === this.candleSticks[i].time.getTime()
+        );
+
+        if (currentCandleStick) {
+          this.candleSticks[i] = currentCandleStick[this.propName];
+        }
+      }
+    } else {
+      const to = new Date();
+      to.setSeconds(0, 0);
+      const from = new Date(to);
+      from.setMinutes(from.getMinutes() - 59);
+
+      this.candleSticks = currentCandleSticks.filter(
+        (x) =>
+          x.time.getTime() >= from.getTime() && x.time.getTime() <= to.getTime()
+      );
+
+      const lastCandleStick = this.candleSticks[this.candleSticks.length - 1];
+      while (this.candleSticks.length > 0 && this.candleSticks.length < 60) {
+        this.candleSticks.push(lastCandleStick);
+      }
+    }
   }
 
   mapRestApiDataToCandleSticks(data) {}
