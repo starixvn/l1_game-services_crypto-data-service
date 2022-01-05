@@ -16,8 +16,8 @@ export default {
     env: "SIT",
   },
   proxy: {
-    host: "10.40.40.245",
-    port: 3128,
+    host: "10.2.252.105",
+    port: 8801,
     protocol: "http",
   },
 };
