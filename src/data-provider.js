@@ -51,7 +51,7 @@ export default class DataProvider {
   initCron() {
     const job = new cron.CronJob(
       "* * * * * *",
-      () => this.updateExchangeData().catch(logger.logError),
+      () => this.updateExchangeData().catch(console.log),
       () => {
         logger.logError(
           `cron unexpectedly stopped at${new Date().toUTCString()}`
@@ -76,22 +76,31 @@ export default class DataProvider {
   }
 
   calculateAverageCandleStick(candleSticks, time) {
-    const total = candleSticks
-      .filter((x) => x)
-      .reduce((prev, cur) => ({
-        open: prev.open + cur.open,
-        close: prev.close + cur.close,
-        high: prev.high + cur.high,
-        low: prev.low + cur.low,
-      }));
     const { length } = candleSticks;
+    const tick = time.getTime();
+
+    let open = 0;
+    let close = 0;
+    let high = 0;
+    let low = 0;
+
+    candleSticks.forEach((x) => {
+      if (x.time.getTime() === tick) {
+        open += x.open;
+      } else {
+        open += x.close;
+      }
+      close += x.close;
+      high += x.high;
+      low += x.low;
+    });
 
     return new CandleStick(
       time,
-      round(total.open / length, 2),
-      round(total.close / length, 2),
-      round(total.high / length, 2),
-      round(total.low / length, 2)
+      round(open / length, 2),
+      round(close / length, 2),
+      round(high / length, 2),
+      round(low / length, 2)
     );
   }
 
@@ -112,7 +121,7 @@ export default class DataProvider {
         current
           ? current.average
           : this.calculateAverageCandleStick(
-              exchangeCandleSticks.map((x) => x[i]),
+              exchangeCandleSticks.filter((x) => x[i]).map((x) => x[i]),
               now
             )
       );
@@ -124,41 +133,20 @@ export default class DataProvider {
     const runningCandleSticks = this.exchangeArr
       .filter((exchange) => exchange.runningCandleStick)
       .map((exchange) => exchange.runningCandleStick);
-    const { length } = runningCandleSticks;
 
     const now = new Date();
     now.setSeconds(0, 0);
-    const currentTick = now.getTime();
 
-    let open = 0;
-    let close = 0;
-    let high = 0;
-    let low = 0;
-
-    runningCandleSticks.forEach((x) => {
-      if (x.time.getTime() === currentTick) {
-        open += x.open;
-      } else {
-        open += x.close;
-      }
-      close += x.close;
-      high += x.high;
-      low += x.low;
-    });
-
-    const candleStick = new CandleStick(
-      now,
-      round(open / length, 2),
-      round(close / length, 2),
-      round(high / length, 2),
-      round(low / length, 2)
+    const candleStick = this.calculateAverageCandleStick(
+      runningCandleSticks,
+      now
     );
 
     const { runningCandleStick } = this;
 
     if (
       runningCandleStick &&
-      runningCandleStick.time.getTime() === currentTick
+      runningCandleStick.time.getTime() === now.getTime()
     ) {
       candleStick.open = runningCandleStick.open;
     }
