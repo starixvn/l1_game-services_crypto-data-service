@@ -52,20 +52,18 @@ export default class Exchange {
 
     this.ws = new WebSocket(this.settings.ws, wsOptions);
 
+    this.ws.on("close", this.handleCloseWS);
+    this.ws.on("error", this.handleWSError);
+
     this.ws.on("open", () => {
       this.handleOpenWS();
-
-      this.ws.on("close", this.handleCloseWS);
-
-      this.ws.on("error", this.handleWSError);
-
       this.ws.on("message", this.handleMessage);
     });
   }
 
   handleCloseWS(event) {
-    logger.logWarning(`${this.settings.name} - Disconnected: ${event}`);
-    this.initWebSocket();
+    logger.logWarning(`${this.settings.name} - Disconnected: ${event} - Reconnect in 30 seconds`);
+    setTimeout(() => this.initWebSocket(), 30000);
   }
 
   handleWSError(event) {
