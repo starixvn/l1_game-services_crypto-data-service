@@ -51,7 +51,7 @@ export default class DataProvider {
   initCron() {
     const job = new cron.CronJob(
       "* * * * * *",
-      () => this.updateExchangeData().catch(console.log),
+      () => this.updateExchangeData().catch(logger.logError),
       () => {
         logger.logError(
           `cron unexpectedly stopped at${new Date().toUTCString()}`
@@ -173,15 +173,18 @@ export default class DataProvider {
       this.averageCandleSticks.shift();
       this.averageCandleSticks.push(this.runningCandleStick);
       this.exchangeArr.forEach((exchange) => {
-        exchange.candleSticks.shift();
         exchange.candleSticks.push(exchange.runningCandleStick);
+
+        if (exchange.candleSticks.length > 60) {
+          exchange.candleSticks.shift();
+        }
       });
     } else {
       this.averageCandleSticks[this.averageCandleSticks.length - 1] =
         this.runningCandleStick;
       this.exchangeArr.forEach((exchange) => {
-        exchange.candleSticks[exchange.candleSticks.length - 1] =
-          exchange.runningCandleStick;
+        exchange.candleSticks.pop();
+        exchange.candleSticks.push(exchange.runningCandleStick);
       });
     }
 

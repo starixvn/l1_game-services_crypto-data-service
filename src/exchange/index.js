@@ -68,6 +68,10 @@ export default class Exchange {
         )
         .map((x) => x[this.propName]);
 
+      if (this.candleSticks.length === 0) {
+        this.candleSticks = currentCandleSticks.slice(-1).map((x) => x[this.propName]);
+      }
+
       const lastCandleStick = this.candleSticks[this.candleSticks.length - 1];
       while (this.candleSticks.length > 0 && this.candleSticks.length < 60) {
         this.candleSticks.push(lastCandleStick);
