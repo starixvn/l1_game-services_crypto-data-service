@@ -16,7 +16,7 @@ export default {
     env: "UAT",
   },
   proxy: {
-    host: "10.2.252.105",
+    host: "10.2.252.100",
     port: 8801,
     protocol: "http",
   },
