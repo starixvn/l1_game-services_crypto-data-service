@@ -19,6 +19,7 @@
     "https-proxy-agent": "^5.0.0",
     "mathjs": "^9.5.0",
     "mongoose": "5.13.9",
+    "node-fetch": "^3.2.3",
     "sc-common": "^1.7.0",
     "ws": "^8.2.1"
   },
