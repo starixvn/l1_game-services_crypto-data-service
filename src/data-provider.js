@@ -18,9 +18,9 @@ export default class DataProvider {
 
     this.exchanges = {
       binanceExchange,
-      huobiExchange,
-      mexcExchange,
-      okexExchange,
+      // huobiExchange,
+      // mexcExchange,
+      // okexExchange,
     };
 
     this.exchangeArr = Object.values(this.exchanges);
