@@ -2,6 +2,7 @@ import appConfigs from "./app-configs";
 import HttpsProxyAgent from "https-proxy-agent";
 import exchangeSettings from "./exchange/exchange-settings";
 import fetch from 'node-fetch';
+import WebSocket from "ws";
 
 console.log("Start testing REST Apis");
 let proxyAgent;
@@ -36,3 +37,23 @@ const funcs = Object.values(exchangeSettings).map((settings) => {
 });
 
 await Promise.all(funcs.map((f) => f()));
+
+const initWebSocket = (provider, websocketUrl) => {
+  const wsOptions = {};
+
+  if (proxyAgent) {
+    wsOptions.agent = proxyAgent;
+  }
+
+  const ws = new WebSocket(websocketUrl, wsOptions);
+
+  ws.on("open", () => {
+    console.log(`Connected ${provider}`);
+
+    ws.close();
+  });
+};
+
+Object.values(exchangeSettings).forEach(settings => {
+  initWebSocket(settings.name, settings.ws);
+});
