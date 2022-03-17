@@ -23,6 +23,8 @@ export default class Exchange {
   }
 
   async getLatestCandleSticks() {
+    const start = new Date();
+    let end = null;
     try {
       const axiosOptions = {};
 
@@ -30,15 +32,15 @@ export default class Exchange {
         axiosOptions.httpsAgent = this.proxyAgent;
       }
 
-      const start = new Date();
       const responseData = await axios.get(this.settings.api, axiosOptions);
+      end = new Date();
       const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
       this.runningCandleStick = candleSticks[candleSticks.length - 1];
       this.candleSticks = candleSticks;
     } catch (exception) {
+      end = new Date();
       logger.log(exception, "error");
     } finally {
-      const end = new Date();
       logger.log(`Request to ${this.settings.api} took ${end-start}ms`);
     }
 
