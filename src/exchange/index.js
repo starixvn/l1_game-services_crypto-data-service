@@ -26,7 +26,9 @@ export default class Exchange {
     const start = new Date();
     let end = null;
     try {
-      const axiosOptions = {};
+      const axiosOptions = {
+        timeout: 60000
+      };
 
       if (this.proxyAgent) {
         axiosOptions.httpsAgent = this.proxyAgent;
