@@ -4,7 +4,7 @@ import exchangeSettings from "./exchange/exchange-settings";
 import fetch from 'node-fetch';
 import WebSocket from "ws";
 
-console.log("Start testing REST Apis");
+console.log("Start testing REST Apis with Proxy 10.2.252.100");
 let proxyAgent;
 if (appConfigs.proxy) {
   proxyAgent = new HttpsProxyAgent({
