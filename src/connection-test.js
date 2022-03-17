@@ -16,6 +16,9 @@ const funcs = Object.values(exchangeSettings).map((settings) => {
     try {
       const axiosOptions = {
         timeout: 60000,
+        headers: {
+          "User-Agent": "curl/7.52.1",
+        },
       };
 
       if (proxyAgent) {
@@ -35,4 +38,4 @@ const funcs = Object.values(exchangeSettings).map((settings) => {
   };
 });
 
-await Promise.all(funcs.map(f => f()));
+await Promise.all(funcs.map((f) => f()));
