@@ -14,11 +14,14 @@ const funcs = Object.values(exchangeSettings).map((settings) => {
     const start = new Date();
     let end = null;
     try {
-      const headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36",
+      const options = {
+        agent: proxyAgent,
+        headers: {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36"},
+        compress: true,
+        insecureHTTPParser: false
       };
 
-      const response = await fetch(settings.api, {agent: proxyAgent, headers: headers});
+      await fetch(settings.api, options);
 
       end = new Date();
       console.log(
