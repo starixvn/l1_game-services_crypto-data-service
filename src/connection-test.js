@@ -17,7 +17,7 @@ const funcs = Object.values(exchangeSettings).map((settings) => {
       const axiosOptions = {
         timeout: 60000,
         headers: {
-          "User-Agent": "curl/7.52.1",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36",
         },
       };
 
