@@ -36,14 +36,14 @@ export default class Exchange {
 
       const responseData = await axios.get(this.settings.api, axiosOptions);
       end = new Date();
+      logger.log(`Request to ${this.settings.api} succeeded, took ${end-start}ms`);
       const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
       this.runningCandleStick = candleSticks[candleSticks.length - 1];
       this.candleSticks = candleSticks;
     } catch (exception) {
       end = new Date();
+      logger.log(`Request to ${this.settings.api} failed took ${end-start}ms`);
       logger.log(exception, "error");
-    } finally {
-      logger.log(`Request to ${this.settings.api} took ${end-start}ms`);
     }
 
     return this.candleSticks;
