@@ -52,6 +52,11 @@ const initWebSocket = (provider, websocketUrl) => {
 
     ws.close();
   });
+
+  ws.on("error", (err) => {
+    console.log(`Connected ${provider} failed!!!!`);
+    console.log(err);
+  })
 };
 
 Object.values(exchangeSettings).forEach(settings => {
