@@ -57,7 +57,7 @@ const initWebSocket = (provider, websocketUrl) => {
     ws.close();
   });
 
-  ws.onerror((err)=>{
+  ws.on("error", (err) => {
     console.log(`Connected ${provider} failed!!!!`);
     console.log(err);
   })
