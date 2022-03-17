@@ -30,12 +30,16 @@ export default class Exchange {
         axiosOptions.httpsAgent = this.proxyAgent;
       }
 
+      const start = new Date();
       const responseData = await axios.get(this.settings.api, axiosOptions);
       const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
       this.runningCandleStick = candleSticks[candleSticks.length - 1];
       this.candleSticks = candleSticks;
     } catch (exception) {
       logger.log(exception, "error");
+    } finally {
+      const end = new Date();
+      logger.log(`Request to ${this.settings.api} took ${end-start}ms`);
     }
 
     return this.candleSticks;
