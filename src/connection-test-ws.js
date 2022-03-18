@@ -16,16 +16,19 @@ const initWebSocket = (provider, websocketUrl) => {
     wsOptions.agent = proxyAgent;
   }
 
+  const start = new Date();
   const ws = new WebSocket(websocketUrl, wsOptions);
 
   ws.on("open", () => {
-    console.log(`Connected ${provider}`);
+    const end = new Date();
+    console.log(`Connected ${provider}, took ${end - start}ms`);
 
     ws.close();
   });
 
   ws.on("error", (err) => {
-    console.log(`Connected ${provider} failed!!!!`);
+    const end = new Date();
+    console.log(`Connected ${provider} failed!!!!, took ${end - start}ms`);
     console.log(err);
   })
 };
