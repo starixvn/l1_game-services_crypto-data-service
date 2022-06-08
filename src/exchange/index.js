@@ -11,6 +11,7 @@ export default class Exchange {
 
   constructor(settings) {
     this.settings = settings;
+    this.propName = settings.name.toLowerCase();
     this.candleSticks = [];
 
     this.handleMessage = this.handleMessage.bind(this);
@@ -22,7 +23,7 @@ export default class Exchange {
     }
   }
 
-  async getLatestCandleSticks() {
+  async getLatestCandleSticks(currentCandleSticks) {
     try {
       const axiosOptions = {};
 
@@ -31,14 +32,51 @@ export default class Exchange {
       }
 
       const responseData = await axios.get(this.settings.api, axiosOptions);
-      const candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
-      this.runningCandleStick = candleSticks[candleSticks.length - 1];
-      this.candleSticks = candleSticks;
+      this.candleSticks = this.mapRestApiDataToCandleSticks(responseData.data);
     } catch (exception) {
-      logger.log(exception, "error");
+      logger.logError(exception);
+    } finally {
+      this.mergeWithCurrentCandleSticks(currentCandleSticks);
+      this.runningCandleStick = this.candleSticks[this.candleSticks.length - 1];
     }
 
     return this.candleSticks;
+  }
+
+  mergeWithCurrentCandleSticks(currentCandleSticks) {
+    if (this.candleSticks.length > 0) {
+      for (let i = 0; i < this.candleSticks.length; i++) {
+        const currentCandleStick = currentCandleSticks.find(
+          (x) => x.time.getTime() === this.candleSticks[i].time.getTime()
+        );
+
+        if (currentCandleStick) {
+          this.candleSticks[i] = currentCandleStick[this.propName];
+        }
+      }
+    } else {
+      const to = new Date();
+      to.setSeconds(0, 0);
+      const from = new Date(to);
+      from.setMinutes(from.getMinutes() - 59);
+
+      this.candleSticks = currentCandleSticks
+        .filter(
+          (x) =>
+            x.time.getTime() >= from.getTime() &&
+            x.time.getTime() <= to.getTime()
+        )
+        .map((x) => x[this.propName]);
+
+      if (this.candleSticks.length === 0) {
+        this.candleSticks = currentCandleSticks.slice(-1).map((x) => x[this.propName]);
+      }
+
+      const lastCandleStick = this.candleSticks[this.candleSticks.length - 1];
+      while (this.candleSticks.length > 0 && this.candleSticks.length < 60) {
+        this.candleSticks.push(lastCandleStick);
+      }
+    }
   }
 
   mapRestApiDataToCandleSticks(data) {}
@@ -51,9 +89,8 @@ export default class Exchange {
     }
 
     this.ws = new WebSocket(this.settings.ws, wsOptions);
-
-    this.ws.on("close", this.handleCloseWS);
     this.ws.on("error", this.handleWSError);
+    this.ws.on("close", this.handleCloseWS);
 
     this.ws.on("open", () => {
       this.handleOpenWS();
@@ -62,12 +99,14 @@ export default class Exchange {
   }
 
   handleCloseWS(event) {
-    logger.logWarning(`${this.settings.name} - Disconnected: ${event} - Reconnect in 30 seconds`);
+    logger.logWarning(
+      `${this.settings.name} - Disconnected: ${event} - Retry in 30 seconds`
+    );
     setTimeout(() => this.initWebSocket(), 30000);
   }
 
   handleWSError(event) {
-    logger.logError(`${this.settings.name} - Error: ${event}`);
+    logger.logError(`${this.settings.name} - Error: ${JSON.stringify(event)}`);
   }
 
   handleOpenWS() {}
