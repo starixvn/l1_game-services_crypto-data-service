@@ -69,7 +69,9 @@ export default class Exchange {
         .map((x) => x[this.propName]);
 
       if (this.candleSticks.length === 0) {
-        this.candleSticks = currentCandleSticks.slice(-1).map((x) => x[this.propName]);
+        this.candleSticks = currentCandleSticks
+          .slice(-1)
+          .map((x) => x[this.propName]);
       }
 
       const lastCandleStick = this.candleSticks[this.candleSticks.length - 1];
@@ -93,6 +95,7 @@ export default class Exchange {
     this.ws.on("close", this.handleCloseWS);
 
     this.ws.on("open", () => {
+      logger.log(`Connected to ${this.settings.name}`);
       this.handleOpenWS();
       this.ws.on("message", this.handleMessage);
     });
