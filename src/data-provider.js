@@ -222,22 +222,28 @@ export default class DataProvider {
   }
 
   checkCandleStickValue() {
-    const lastCandle =
-      this.averageCandleSticks[this.averageCandleSticks.length - 2];
-    const currentCandle =
-      this.averageCandleSticks[this.averageCandleSticks.length - 1];
+    try {
+      const lastCandle =
+        this.averageCandleSticks[this.averageCandleSticks.length - 2];
+      const currentCandle =
+        this.averageCandleSticks[this.averageCandleSticks.length - 1];
 
-    if (
-      lastCandle.open === currentCandle.open &&
-      lastCandle.close === currentCandle.close &&
-      lastCandle.high === currentCandle.high &&
-      lastCandle.low === currentCandle.low
-    ) {
-      logger.logCritical(
-        `The last 2 candles have the same result: ${JSON.stringify(
-          lastCandle
-        )} - ${JSON.stringify(currentCandle)}`
-      );
+      if (
+        lastCandle.open === currentCandle.open &&
+        lastCandle.close === currentCandle.close &&
+        lastCandle.high === currentCandle.high &&
+        lastCandle.low === currentCandle.low
+      ) {
+        logger.logCritical(
+          `The last 2 candles have the same result: ${JSON.stringify(
+            lastCandle
+          )} - ${JSON.stringify(currentCandle)}`
+        );
+      }
+
+      this.exchangeArr.forEach((x) => x.checkCandleStickValue());
+    } catch (e) {
+      console.log(e);
     }
   }
 }

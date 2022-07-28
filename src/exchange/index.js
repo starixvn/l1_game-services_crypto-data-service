@@ -119,4 +119,24 @@ export default class Exchange {
   updateLatestCandleStick(candle) {
     this.runningCandleStick = candle;
   }
+
+  checkCandleStickValue() {
+    const lastCandle =
+      this.candleSticks[this.candleSticks.length - 2];
+    const currentCandle =
+      this.candleSticks[this.candleSticks.length - 1];
+
+    if (
+      lastCandle.open === currentCandle.open &&
+      lastCandle.close === currentCandle.close &&
+      lastCandle.high === currentCandle.high &&
+      lastCandle.low === currentCandle.low
+    ) {
+      logger.logCritical(
+        `${this.settings.name} - The last 2 candles have the same result: ${JSON.stringify(
+          lastCandle
+        )} - ${JSON.stringify(currentCandle)}`
+      );
+    }
+  }
 }
