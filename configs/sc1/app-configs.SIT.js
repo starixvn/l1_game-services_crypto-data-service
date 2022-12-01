@@ -16,8 +16,25 @@ export default {
     env: "SIT",
   },
   proxy: {
-    host: "10.40.40.245",
-    port: 3128,
-    protocol: "http",
+    binance: {
+      host: "10.40.40.245",
+      port: 3128,
+      protocol: "http",
+    },
+    huobi: {
+      host: "10.40.40.245",
+      port: 3128,
+      protocol: "http",
+    },
+    mexc: {
+      host: "10.2.252.100",
+      port: 8801,
+      protocol: "http",
+    },
+    okex: {
+      host: "10.40.40.245",
+      port: 3128,
+      protocol: "http",
+    },
   },
 };

@@ -11,7 +11,7 @@ export default class Exchange {
 
   constructor(settings) {
     this.settings = settings;
-    this.propName = settings.name.toLowerCase();
+    this.configName = settings.name.toLowerCase();
     this.candleSticks = [];
 
     this.handleMessage = this.handleMessage.bind(this);
@@ -19,7 +19,7 @@ export default class Exchange {
     this.handleCloseWS = this.handleCloseWS.bind(this);
 
     if (appConfigs.proxy) {
-      this.proxyAgent = new HttpsProxyAgent(appConfigs.proxy);
+      this.proxyAgent = new HttpsProxyAgent(appConfigs.proxy[this.configName]);
     }
   }
 
@@ -51,7 +51,7 @@ export default class Exchange {
         );
 
         if (currentCandleStick) {
-          this.candleSticks[i] = currentCandleStick[this.propName];
+          this.candleSticks[i] = currentCandleStick[this.configName];
         }
       }
     } else {
@@ -66,12 +66,12 @@ export default class Exchange {
             x.time.getTime() >= from.getTime() &&
             x.time.getTime() <= to.getTime()
         )
-        .map((x) => x[this.propName]);
+        .map((x) => x[this.configName]);
 
       if (this.candleSticks.length === 0) {
         this.candleSticks = currentCandleSticks
           .slice(-1)
-          .map((x) => x[this.propName]);
+          .map((x) => x[this.configName]);
       }
 
       const lastCandleStick = this.candleSticks[this.candleSticks.length - 1];
@@ -121,10 +121,8 @@ export default class Exchange {
   }
 
   checkCandleStickValue() {
-    const lastCandle =
-      this.candleSticks[this.candleSticks.length - 2];
-    const currentCandle =
-      this.candleSticks[this.candleSticks.length - 1];
+    const lastCandle = this.candleSticks[this.candleSticks.length - 2];
+    const currentCandle = this.candleSticks[this.candleSticks.length - 1];
 
     if (
       lastCandle.open === currentCandle.open &&
@@ -133,7 +131,9 @@ export default class Exchange {
       lastCandle.low === currentCandle.low
     ) {
       logger.logCritical(
-        `${this.settings.name} - The last 2 candles have the same result: ${JSON.stringify(
+        `${
+          this.settings.name
+        } - The last 2 candles have the same result: ${JSON.stringify(
           lastCandle
         )} - ${JSON.stringify(currentCandle)}`
       );
