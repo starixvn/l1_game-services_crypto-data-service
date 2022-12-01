@@ -16,8 +16,8 @@ export default {
     env: "PROD",
   },
   proxy: {
-    host: "10.2.252.100",
-    port: 8801,
+    host: "10.40.40.245",
+    port: 3128,
     protocol: "http",
   },
 };
