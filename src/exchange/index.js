@@ -1,7 +1,7 @@
 import axios from "axios";
+import HttpsProxyAgent from "https-proxy-agent";
 import { logger } from "sc-common";
 import WebSocket from "ws";
-import HttpsProxyAgent from "https-proxy-agent";
 import appConfigs from "../app-configs";
 
 export default class Exchange {
@@ -130,12 +130,20 @@ export default class Exchange {
       lastCandle.high === currentCandle.high &&
       lastCandle.low === currentCandle.low
     ) {
-      logger.logCritical(
+      const currentTime = new Date();
+      const candleTime = lastCandle.time;
+      const logLevel =
+        currentTime.getTime() > candleTime.getTime() &&
+        currentTime.getMinutes() === candleTime.getMinutes()
+          ? "critical"
+          : "warning";
+      logger.log(
         `${
           this.settings.name
         } - The last 2 candles have the same result: ${JSON.stringify(
           lastCandle
-        )} - ${JSON.stringify(currentCandle)}`
+        )} - ${JSON.stringify(currentCandle)}`,
+        logLevel
       );
     }
   }
