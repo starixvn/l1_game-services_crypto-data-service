@@ -96,6 +96,7 @@ export default class Exchange {
 
     this.ws.on("open", () => {
       logger.log(`Connected to ${this.settings.name}`);
+      this.lastWsErrorTime = null;
       this.handleOpenWS();
       this.ws.on("message", this.handleMessage);
     });
@@ -109,7 +110,23 @@ export default class Exchange {
   }
 
   handleWSError(event) {
-    logger.logError(`${this.settings.name} - Error: ${JSON.stringify(event)}`);
+    let logLevel = "warning";
+    if (this.lastWsErrorTime) {
+      const currentTime = new Date();
+
+      if (currentTime.getTime() - this.lastWsErrorTime.getTime() >= 3600000) {
+        logLevel = "error";
+        this.lastWsErrorTime = currentTime;
+      }
+    } else {
+      logLevel = "error";
+      this.lastWsErrorTime = new Date();
+    }
+
+    logger.log(
+      `${this.settings.name} - Error: ${JSON.stringify(event)}`,
+      logLevel
+    );
   }
 
   handleOpenWS() {}
