@@ -17,6 +17,6 @@ export default {
 	okex: {
 		name: "Okex",
 		api: "https://www.okex.com/api/v5/market/candles?limit=60&bar=1m&instId=BTC-USDT",
-		ws: "wss://ws.okex.com:8443/ws/v5/public",
+		ws: "wss://wsaws.okx.com:8443/ws/v5/business",
 	},
 };
