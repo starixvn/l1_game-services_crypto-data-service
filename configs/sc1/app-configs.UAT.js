@@ -17,23 +17,23 @@ export default {
   },
   proxy: {
     binance: {
-      host: "10.40.40.245",
-      port: 3128,
+      host: "lisasqd.nebula.prod",
+      port: 8801,
       protocol: "http",
     },
     huobi: {
-      host: "10.40.40.245",
-      port: 3128,
+      host: "lisasqd.nebula.prod",
+      port: 8801,
       protocol: "http",
     },
     mexc: {
-      host: "10.2.252.100",
+      host: "lisasqd.nebula.prod",
       port: 8801,
       protocol: "http",
     },
     okex: {
-      host: "10.40.40.245",
-      port: 3128,
+      host: "lisasqd.nebula.prod",
+      port: 8801,
       protocol: "http",
     },
   },
