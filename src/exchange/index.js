@@ -122,7 +122,8 @@ export default class Exchange {
       logLevel = "error";
       this.lastWsErrorTime = new Date();
     }
-
+    console.log(this.configName);
+    console.log(event);
     logger.log(
       `${this.settings.name} - Error: ${JSON.stringify(event)}`,
       logLevel

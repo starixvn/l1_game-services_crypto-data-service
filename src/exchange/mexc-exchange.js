@@ -24,24 +24,21 @@ export default class MexcExchange extends Exchange {
     );
     this.ws.send(
       JSON.stringify({
-        method: "sub.kline",
-        param: {
-          symbol: "BTC_USDT",
-          interval: "Min1",
-        },
+        method: "SUBSCRIPTION",
+        params: ["spot@public.kline.v3.api@BTCUSDT@Min1"],
       })
     );
   }
 
   mapRestApiDataToCandleSticks(data) {
-    return data.data.map(
+    return data.map(
       (x) =>
         new CandleStick(
           x[0] * 1000,
           parseFloat(x[1]),
+          parseFloat(x[4]),
           parseFloat(x[2]),
-          parseFloat(x[3]),
-          parseFloat(x[4])
+          parseFloat(x[3])
         )
     );
   }
@@ -50,13 +47,14 @@ export default class MexcExchange extends Exchange {
     try {
       const jsonObj = JSON.parse(data);
 
-      if (jsonObj.channel === "push.kline") {
+      if (jsonObj.c === "spot@public.kline.v3.api@BTCUSDT@Min1") {
+        const kline = jsonObj.d.k;
         const candle = new CandleStick(
-          jsonObj.data.t * 1000,
-          jsonObj.data.o,
-          jsonObj.data.c,
-          jsonObj.data.h,
-          jsonObj.data.l
+          kline.t * 1000,
+          kline.o,
+          kline.c,
+          kline.h,
+          kline.l
         );
 
         this.updateLatestCandleStick(candle);
