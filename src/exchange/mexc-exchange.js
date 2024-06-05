@@ -34,7 +34,7 @@ export default class MexcExchange extends Exchange {
     return data.map(
       (x) =>
         new CandleStick(
-          x[0] * 1000,
+          x[0],
           parseFloat(x[1]),
           parseFloat(x[4]),
           parseFloat(x[2]),
