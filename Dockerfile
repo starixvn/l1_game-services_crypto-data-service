@@ -1,4 +1,4 @@
-FROM hub.lumigame.com/docker-hub/library/node:18.1-alpine 
+FROM hub.lumigame.com/base/node:18-16-alpine-24h1.1
 
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
