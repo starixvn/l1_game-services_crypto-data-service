@@ -51,11 +51,12 @@ export default class MexcExchange extends Exchange {
         const kline = jsonObj.d.k;
         const candle = new CandleStick(
           kline.t * 1000,
-          kline.o,
-          kline.c,
-          kline.h,
-          kline.l
+          parseFloat(kline.o),
+          parseFloat(kline.c),
+          parseFloat(kline.h),
+          parseFloat(kline.l)
         );
+        console.log(candle);
 
         this.updateLatestCandleStick(candle);
       }
