@@ -56,7 +56,6 @@ export default class MexcExchange extends Exchange {
           parseFloat(kline.h),
           parseFloat(kline.l)
         );
-        console.log(candle);
 
         this.updateLatestCandleStick(candle);
       }
