@@ -17,7 +17,7 @@ export default class MexcExchange extends Exchange {
       () =>
         this.ws.send(
           JSON.stringify({
-            method: "ping",
+            method: "PING",
           })
         ),
       20000
