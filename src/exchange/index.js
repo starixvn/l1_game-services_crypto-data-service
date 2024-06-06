@@ -163,6 +163,8 @@ export default class Exchange {
         )} - ${JSON.stringify(currentCandle)}`,
         logLevel
       );
+
+      this.ws.close(1000);
     }
   }
 }
