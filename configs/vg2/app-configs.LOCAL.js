@@ -14,6 +14,6 @@ export default {
     sentryUrl:
       "https://acb36eb835d948d68c1aad9873754d51@sentry.lumigame.com/27",
     logIdentifier: "crypto-data-service",
-    env: "LOCAL-1",
+    env: "LOCAL_1",
   },
 };
