@@ -17,22 +17,22 @@ export default {
   },
   proxy: {
      binance: {
-      host: "iiusqd.gamora.prod",
+      host: "iusqd.gamora.prod",
       port: 8801,
       protocol: "http",
     },
     huobi: {
-      host: "iiusqd.gamora.prod",
+      host: "iusqd.gamora.prod",
       port: 8801,
       protocol: "http",
     },
     mexc: {
-      host: "iiusqd.gamora.prod",
+      host: "iusqd.gamora.prod",
       port: 8801,
       protocol: "http",
     },
     okex: {
-      host: "iiusqd.gamora.prod",
+      host: "iusqd.gamora.prod",
       port: 8801,
       protocol: "http",
     },
