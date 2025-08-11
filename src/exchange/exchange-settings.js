@@ -12,7 +12,7 @@ export default {
 	mexc: {
 		name: "Mexc",
 		api: "https://api.mexc.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60",
-		ws: "wws://wbs-api.mexc.com/ws",
+		ws: "wss://wbs-api.mexc.com/ws",
 	},
 	okex: {
 		name: "Okex",
