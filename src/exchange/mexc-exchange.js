@@ -46,15 +46,20 @@ export default class MexcExchange extends Exchange {
     async handleMessage(data) {
         try {
             const jsonObj = JSON.parse(data);
+            console.log(data);
+            console.log(jsonObj);
 
-            if (jsonObj.c === "spot@public.kline.v3.api.pb@BTCUSDT@Min1") {
-                const kline = jsonObj.d.k;
+            if (
+                jsonObj.channel === "spot@public.kline.v3.api.pb@BTCUSDT@Min1"
+            ) {
+                console.log(jsonObj);
+                const kline = jsonObj.publicspotkline;
                 const candle = new CandleStick(
-                    kline.t * 1000,
-                    parseFloat(kline.o),
-                    parseFloat(kline.c),
-                    parseFloat(kline.h),
-                    parseFloat(kline.l)
+                    jsonObj.createtime * 1000,
+                    parseFloat(kline.openingprice),
+                    parseFloat(kline.closingprice),
+                    parseFloat(kline.highestprice),
+                    parseFloat(kline.lowestprice)
                 );
 
                 this.updateLatestCandleStick(candle);
