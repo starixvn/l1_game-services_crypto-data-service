@@ -1,6 +1,5 @@
 variables:
     SMOKE_PRODUCT_NAME: CryptoDataService
-
 include:
     - project: ci/core-cicd
       ref: main
