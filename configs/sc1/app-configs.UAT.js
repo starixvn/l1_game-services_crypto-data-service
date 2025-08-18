@@ -2,7 +2,7 @@ export default {
     hostingPort: 5000,
     enabledLogs: true,
     database: {
-        url: "mongodb://lmn_backend:LmnBackend%4022027@10.146.34.26:39110,10.146.34.27:39110,10.146.34.30:39110,10.146.34.28:39110/?replicaSet=SabaMain",
+        url: "mongodb://lmn_backend:LmnBackend%4022027@10.146.34.28:39120/?replicaSet=SabaUAT",
         options: {
             dbName: "minigame",
             useNewUrlParser: true,
