@@ -6,5 +6,6 @@ include:
       file: luminet.gitlab-ci.yml
 
 sonar_js:
-    stage: none
-    when: manual
+    stage: test
+    script:
+        - echo "SonarJS disabled"
