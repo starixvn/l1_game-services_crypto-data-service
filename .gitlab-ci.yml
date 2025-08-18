@@ -7,4 +7,4 @@ include:
 
 sonar_js:
     stage: none
-    when: never
+    when: manual
