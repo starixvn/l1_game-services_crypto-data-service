@@ -17,22 +17,22 @@ export default {
     },
     proxy: {
         binance: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
         huobi: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
         mexc: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
         okex: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
