@@ -6,6 +6,7 @@
     "type": "module",
     "scripts": {
         "test": "jest",
+        "test-coverage": "jest --collect-coverage",
         "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node ./src/app.js",
         "reg": "npm set registry http://npm.lumigame.com"
     },
