@@ -1,6 +1,10 @@
+import { createRequire } from "module";
 import { logger } from "sc-common";
 import Exchange from ".";
 import CandleStick from "../candle-stick";
+
+const require = createRequire(import.meta.url);
+const { PushDataV3ApiWrapper } = require("./proto/PushDataV3ApiWrapper_pb.cjs");
 
 export default class MexcExchange extends Exchange {
     constructor(mexcSettings) {
@@ -45,24 +49,28 @@ export default class MexcExchange extends Exchange {
 
     async handleMessage(data) {
         try {
-            const jsonObj = JSON.parse(data);
-            console.log(data);
-            console.log(jsonObj);
+            if (data.toString().includes('"id":0,"code":0')) {
+                return;
+            }
+            const wrapperMessage = PushDataV3ApiWrapper.deserializeBinary(data);
 
             if (
-                jsonObj.channel === "spot@public.kline.v3.api.pb@BTCUSDT@Min1"
+                wrapperMessage.getChannel() ===
+                "spot@public.kline.v3.api.pb@BTCUSDT@Min1"
             ) {
-                console.log(jsonObj);
-                const kline = jsonObj.publicspotkline;
-                const candle = new CandleStick(
-                    jsonObj.createtime * 1000,
-                    parseFloat(kline.openingprice),
-                    parseFloat(kline.closingprice),
-                    parseFloat(kline.highestprice),
-                    parseFloat(kline.lowestprice)
-                );
+                const klineData = wrapperMessage.getPublicspotkline();
+                if (klineData) {
+                    const candle = new CandleStick(
+                        wrapperMessage.getCreatetime() ||
+                            klineData.getWindowstart(),
+                        parseFloat(klineData.getOpeningprice()),
+                        parseFloat(klineData.getClosingprice()),
+                        parseFloat(klineData.getHighestprice()),
+                        parseFloat(klineData.getLowestprice())
+                    );
 
-                this.updateLatestCandleStick(candle);
+                    this.updateLatestCandleStick(candle);
+                }
             }
         } catch (exception) {
             logger.logError(exception);
