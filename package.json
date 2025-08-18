@@ -20,9 +20,10 @@
         "google-protobuf": "^3.21.4",
         "https-proxy-agent": "^5.0.0",
         "mathjs": "^9.5.0",
-        "mongoose": "5.13.9",
-        "sc-common": "^1.7.0",
-        "ws": "^8.2.1"
+        "mongoose": "6.13.6",
+        "sc-common": "2.0.0",
+        "ws": "^8.2.1",
+        "minimist": "1.2.6"
     },
     "devDependencies": {
         "@babel/core": "^7.28.3",
