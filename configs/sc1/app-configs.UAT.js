@@ -2,7 +2,7 @@ export default {
     hostingPort: 5000,
     enabledLogs: true,
     database: {
-        url: "mongodb://lmn_backend:LmnBackend%4022027@10.99.99.187:27201/?replicaSet=SabaUAT",
+        url: "mongodb://lmn_backend:LmnBackend%4022027@10.146.34.26:39110,10.146.34.27:39110,10.146.34.30:39110,10.146.34.28:39110/?replicaSet=SabaMain",
         options: {
             dbName: "minigame",
             useNewUrlParser: true,
@@ -17,22 +17,22 @@ export default {
     },
     proxy: {
         binance: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
         huobi: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
         mexc: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
         okex: {
-            host: "lisasqd.nebula.prod",
+            host: "iusqd-uat.gamora.prod",
             port: 8801,
             protocol: "http",
         },
