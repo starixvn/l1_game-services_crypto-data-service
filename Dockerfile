@@ -1,4 +1,4 @@
-FROM hub.lumigame.com/base/node:18-16-alpine-24h1.1
+FROM hub.lumigame.com/base/node:18-alpine-25h2
 
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
