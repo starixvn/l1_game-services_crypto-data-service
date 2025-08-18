@@ -6,4 +6,5 @@ include:
       file: luminet.gitlab-ci.yml
 
 sonar_js:
+    stage: none
     when: never
